@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <style>
+    .container{
+      box-sizing: border-box;
+      margin: 50px auto;
+      padding: 24px;
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      background-color: aqua;
+    }
+    #desc{
+      padding: 8px 16px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid gray;
+    }
+
+    button {
+      margin: 4px 0px;
+      padding: 8px 16px;
+    }
+
+    #desc:focus{
+      outline: none;
+    }
+    .hidden{
+      display: none;
+    }
+
+    #error{
+      color: red;
+    }
+
+  </style>
+</head>
+<body>
+<div id="error" class="hidden">Something went wrong!</div>
+
+<div class="container">
+  <form id="form">
+    <input type="text" id="desc" name="desc" placeholder="Enter todo">
+    <button type="submit">Add Todo</button>
+  </form>
+
+  <ul id="todos">
+    {% for d in data %}
+    <li>{{ d.description }}</li>
+    {% endfor %}
+  </ul>
+</div>
+  <script>
+    document.getElementById('form').addEventListener('submit',
+    e => {
+      e.preventDefault()
+
+      const payload = new FormData(form);
+      const message = [...payload][0][1]
+      fetch('/todos/create',{
+      method: 'POST',
+      body: JSON.stringify({
+        'description': message
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    .then( response => {
+      return response.json();
+    })
+
+    .then(jsonResponse => {
+      console.log(jsonResponse['description']);
+      const listItem = document.createElement('LI');
+      listItem.innerHTML = jsonResponse['description'];
+      document.getElementById('todos').appendChild(listItem);
+      document.getElementById('error').classList.add('hidden');
+    })
+    
+    .catch( ()=>{
+      document.getElementById('error').classList.remove('hidden');
+    });
+    });
+  </script>
+</body>
+</html>
